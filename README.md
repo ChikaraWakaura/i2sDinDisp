@@ -118,7 +118,7 @@ TFT_eSPI の設定(Arduino/libraries/TFT_eSPI/User_Setup.h)は以下のとおり
 TFT_eSPI のタッチパネル機能を利用する場合には TFT の個体差があるためキャリブレーション(スケッチ例→TFT_eSPI→Generic→Touch_calibrate)プログラムを
 一度書き込んで得られた配列値と差し替えてください。
 
-i2sDinDisp (i2sDinDisp.ino)
+    i2sDinDisp (i2sDinDisp.ino)
 
     14 #ifdef TOUCH_CS
     15 uint16_t calData[5] = { 462, 3364, 336, 3324, 7 };
@@ -152,7 +152,7 @@ FFT 後の周波数解析結果をバンド化するアルゴリズムは昔組�
 おまけレベルな周波数スペクトル表示の縦軸の dB レンジ値(#define DB_RANGE_VALUE 99)は [PCM1808](https://www.ti.com/lit/ds/symlink/pcm1808.pdf) SNR or ダイナミック
 レンジ 99dB と記載されたスペックより -99dB としています。DB_RANGE_VALUE を縦軸の最低値として目盛りをふっています。
 
-i2sDinDisp (i2sDinDisp.ino)
+    i2sDinDisp (i2sDinDisp.ino)
 
     12 int idBList[] = { 6, 10, 15, 20, 30, 40, 50, 60, 70, 80, DB_RANGE_VALUE };
 
