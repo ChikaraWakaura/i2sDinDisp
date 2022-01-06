@@ -13,9 +13,8 @@ MCK(マスタークロック) 出せるようになったんだと思いまし�
 (外部電源入力ピン出し。I2S関連端子ピン出し。外部クロック入力可化。MD0/MD1/FMTのジャンパ化)したものを esp32 で活用して見ようと仕事の合間を見ながら
 ちまちま進めて結果がここです。
 
-そもそも某氏から ti の PCM1808 旧Burr Brown製 実装ボード製作をせがまれたのもトラ技2017年1月号で [Pumpkin Pi](http://einstlab.web.fc2.com/RaspberryPi/PumpkinPi.html) の記事を読んだらしく手持ちの
-アナログ音源(SP/EP/LP/カセットテープ/MD/などｗ)を 24bit/96KHz で取り込みしたいというオカルトチックな欲望と安価に製作依頼をして楽したいと言う狙いがあったらしい(笑)
-[マルツ](https://www.marutsu.co.jp/select/list/detail.php?id=258)で完成品も部品セットもあるから自分で注文して作れと言っても
+そもそも某氏から ti の PCM1808 旧Burr Brown製 実装ボード製作をせがまれたのもトラ技2017年1月号で [Pumpkin Pi](http://einstlab.web.fc2.com/RaspberryPi/PumpkinPi.html) の記事を読んだらしく手持ちのアナログ音源(SP/EP/LP/カセットテープ/MD/などｗ)を 24bit/96KHz で取り込みしたいというオカルトチックな欲望と安価に製作依頼をして楽したいと言う狙いがあったらしい(笑)
+[マルツ](https://www.marutsu.co.jp/select/list/detail.php?id=258)で完成品も部品セットもあるから自分で注文して作れと言っても<br>
 「arecord して flac 化するスクリプトは自分で書くからさ〜 老眼すぎてもう手ハンダ無理(TдT) PCM1808 だけでいいんよ。頼むよ〜(^o^)」と某氏は言ってた気がする(笑)
 
 ![トラ技2017年1月号表紙](/img/トラ技2017年1月.jpg)
@@ -25,20 +24,19 @@ MCK(マスタークロック) 出せるようになったんだと思いまし�
 以下で行いました。利用させて頂いたツール/ライブラリの作者orグループor会社の方々には感謝申し上げます。
 
 ハードウェア
-
-esp32-wrover-b 搭載開発ボード esp32-wroom-32 搭載開発ボードも可。以下esp32と略
-ILI9341 SPI 接続 240x320 RGB565 タッチパネル付き 以下TFTと略
-PCM1808 チップ実装ボード 自作。以下PCM1808ボードと略
+esp32-wrover-b 搭載開発ボード(esp32-wroom-32 搭載開発ボードも可。以下esp32と略)<br>
+ILI9341 SPI 接続 240x320 RGB565 タッチパネル付き(以下TFTと略)<br>
+PCM1808 チップ実装ボード(自作。以下PCM1808ボードと略)<br>
 
 PCM1808ボードは[秋月電子通商](https://akizukidenshi.com/catalog/default.aspx)な部品で元々 PCM1808 マスターで 48K or 96K ジャンパピンで組んでたのが丸わかりです(笑)
 ![PCM1808ボード](/img/P_20220106_213831.jpg)
 
 ソフトウェア
 
-[arduino IDE](https://www.arduino.cc/en/software) Linux 64bits ver 1.8.19
-[Arduino core for the ESP32](https://github.com/espressif/arduino-esp32) ver 2.0.2
-[TFT_eSPI](https://github.com/Bodmer/TFT_eSPI) ver 2.4.2
-[arduinoFFT](https://github.com/kosme/arduinoFFT) ver 1.5.6
+[arduino IDE](https://www.arduino.cc/en/software) Linux 64bits ver 1.8.19<br>
+[Arduino core for the ESP32](https://github.com/espressif/arduino-esp32) ver 2.0.2<br>
+[TFT_eSPI](https://github.com/Bodmer/TFT_eSPI) ver 2.4.2<br>
+[arduinoFFT](https://github.com/kosme/arduinoFFT) ver 1.5.6<br>
 
 # 4. ハード編
 
@@ -65,7 +63,7 @@ TFT と esp32 のつなぎ (CS 分離で VSPI 使用)
       3 SD_MISO   --- NC
       4 SD_SCK    --- NC
 
-PCM1808ボードは ti [資料](https://www.ti.com/lit/ds/symlink/pcm1808.pdf)より 8.2 Typical Application の赤枠内を実装したものです。
+PCM1808ボードは ti [資料](https://www.ti.com/lit/ds/symlink/pcm1808.pdf)より 8.2 Typical Application の赤枠内を実装したものです。<br>
 (5)の破線囲みは実装していません。
 
 ![PCM1808 Typical Application](/img/PCM1808_002.jpg)
@@ -84,8 +82,8 @@ PCM1808ボードと esp32 のつなぎ
 つなぎ全景を示します。
 ![つなぎ全景](/img/P_20220106_213712.jpg)
 
-esp32 の GPIO0 をそのまま PCM1808ボードの SCKI へ。なるべく距離は短くしていますが、こんなのじゃ工業製品として失格です(爆笑)
-むき出しボードで esp32 WiFi 切らずジャンプワイヤでループ作っているのでノイズがのる事は想定内です。
+esp32 の GPIO0 をそのまま PCM1808ボードの SCKI へ。なるべく距離は短くしていますが、こんなのじゃ工業製品として失格です(爆笑)<br>
+むき出しボードで esp32 WiFi 切らずジャンプワイヤでループ作っているのでノイズがのる事は想定内です。<br>
 [PCM1808](https://www.ti.com/lit/ds/symlink/pcm1808.pdf) を 5V 端子が無い esp32 な開発ボードで利用したい場合は 5V が利用できる外部電源を活用して
 GND は共用したら良いと思います。
 
@@ -115,8 +113,7 @@ TFT_eSPI の設定(Arduino/libraries/TFT_eSPI/User_Setup.h)は以下のとおり
     #define SPI_READ_FREQUENCY  20000000
     #define SPI_TOUCH_FREQUENCY 2500000
 
-TFT_eSPI のタッチパネル機能を利用する場合には TFT の個体差があるためキャリブレーション(スケッチ例→TFT_eSPI→Generic→Touch_calibrate)プログラムを
-一度書き込んで得られた配列値と差し替えてください。
+TFT_eSPI のタッチパネル機能を利用する場合には TFT の個体差があるためキャリブレーション(スケッチ例→TFT_eSPI→Generic→Touch_calibrate)プログラムを一度書き込んで得られた配列値と差し替えてください。
 
     i2sDinDisp (i2sDinDisp.ino)
 
