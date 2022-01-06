@@ -42,26 +42,26 @@ PCM1808ボードは[秋月電子通商](https://akizukidenshi.com/catalog/defaul
 
 TFT と esp32 のつなぎ (CS 分離で VSPI 使用)
 
-  2.8 TFT          esp32
-   1 VCC       --- 3V3
-   2 GND       --- GND
-   3 CS        --- 15 GPIO15
-   4 RESET     ---  4 GPIO4
-   5 DC        ---  2 GPIO2
-   6 SDI(MOSI) --- 23 VSPI MOSI
-   7 SCK       --- 18 VSPI CLK
-   8 LED       --- 32 GPIO32
-   9 SDO(MISO) --- 19 VSPI MISO
-  10 T_CLK     --- 18 VSPI CLK
-  11 T_CS      --- 21 GPIO21
-  12 T_DIN     --- 23 VSPI MOSI
-  13 T_DO      --- 19 VSPI MISO
-  14 T_IRQ     --- NC
-  
-  1 SD_CS     --- NC
-  2 SD_MOSI   --- NC
-  3 SD_MISO   --- NC
-  4 SD_SCK    --- NC
+    2.8 TFT          esp32
+      1 VCC       --- 3V3
+      2 GND       --- GND
+      3 CS        --- 15 GPIO15
+      4 RESET     ---  4 GPIO4
+      5 DC        ---  2 GPIO2
+      6 SDI(MOSI) --- 23 VSPI MOSI      
+      7 SCK       --- 18 VSPI CLK
+      8 LED       --- 32 GPIO32
+      9 SDO(MISO) --- 19 VSPI MISO
+     10 T_CLK     --- 18 VSPI CLK
+     11 T_CS      --- 21 GPIO21
+     12 T_DIN     --- 23 VSPI MOSI
+     13 T_DO      --- 19 VSPI MISO
+     14 T_IRQ     --- NC
+    
+    1 SD_CS     --- NC
+    2 SD_MOSI   --- NC
+    3 SD_MISO   --- NC
+    4 SD_SCK    --- NC
 
 PCM1808ボードは ti [資料](https://www.ti.com/lit/ds/symlink/pcm1808.pdf)より 8.2 Typical Application の赤枠内を実装したものです。
 (5)の破線囲みは実装していません。
