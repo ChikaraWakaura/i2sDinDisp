@@ -58,10 +58,10 @@ TFT と esp32 のつなぎ (CS 分離で VSPI 使用)
      13 T_DO      --- 19 VSPI MISO
      14 T_IRQ     --- NC
     
-    1 SD_CS     --- NC
-    2 SD_MOSI   --- NC
-    3 SD_MISO   --- NC
-    4 SD_SCK    --- NC
+      1 SD_CS     --- NC
+      2 SD_MOSI   --- NC
+      3 SD_MISO   --- NC
+      4 SD_SCK    --- NC
 
 PCM1808ボードは ti [資料](https://www.ti.com/lit/ds/symlink/pcm1808.pdf)より 8.2 Typical Application の赤枠内を実装したものです。
 (5)の破線囲みは実装していません。
@@ -70,14 +70,14 @@ PCM1808ボードは ti [資料](https://www.ti.com/lit/ds/symlink/pcm1808.pdf)�
 
 PCM1808ボードと esp32 のつなぎ
 
-PCM1808ボード    esp32
-5V   ----------- 5V
-3.3V ----------- 3V3
-GND  ----------- GND
-SCKI -----------  0 GPIO0
-LRCK ----------- 27 GPIO27
-BCK  ----------- 26 GPIO26
-DOUT ----------- 25 GPIO25
+    PCM1808ボード    esp32
+    5V   ----------- 5V
+    3.3V ----------- 3V3
+    GND  ----------- GND
+    SCKI -----------  0 GPIO0
+    LRCK ----------- 27 GPIO27
+    BCK  ----------- 26 GPIO26
+    DOUT ----------- 25 GPIO25
 
 つなぎ全景を示します。
 ![つなぎ全景](/img/P_20220106_213712.jpg)
@@ -91,36 +91,36 @@ GND は共用したら良いと思います。
 
 TFT_eSPI の設定(Arduino/libraries/TFT_eSPI/User_Setup.h)は以下のとおりです。
 
-#define ILI9341_DRIVER
-#define TFT_BL              32
-#define TFT_BACKLIGHT_ON    HIGH
-#define TFT_MISO            19
-#define TFT_MOSI            23
-#define TFT_SCLK            18
-#define TFT_CS              15
-#define TFT_DC              2
-#define TFT_RST             4
-#define TOUCH_CS            21
-#define LOAD_GLCD
-#define LOAD_FONT2
-#define LOAD_FONT4
-#define LOAD_FONT6
-#define LOAD_FONT7
-#define LOAD_FONT8
-#define LOAD_GFXFF
-#define SMOOTH_FONT
-#define SPI_FREQUENCY       40000000
-#define SPI_READ_FREQUENCY  20000000
-#define SPI_TOUCH_FREQUENCY 2500000
+    #define ILI9341_DRIVER
+    #define TFT_BL              32
+    #define TFT_BACKLIGHT_ON    HIGH
+    #define TFT_MISO            19
+    #define TFT_MOSI            23
+    #define TFT_SCLK            18
+    #define TFT_CS              15
+    #define TFT_DC              2
+    #define TFT_RST             4
+    #define TOUCH_CS            21
+    #define LOAD_GLCD
+    #define LOAD_FONT2
+    #define LOAD_FONT4
+    #define LOAD_FONT6
+    #define LOAD_FONT7
+    #define LOAD_FONT8
+    #define LOAD_GFXFF
+    #define SMOOTH_FONT
+    #define SPI_FREQUENCY       40000000
+    #define SPI_READ_FREQUENCY  20000000
+    #define SPI_TOUCH_FREQUENCY 2500000
 
 TFT_eSPI のタッチパネル機能を利用する場合には TFT の個体差があるためキャリブレーション(スケッチ例→TFT_eSPI→Generic→Touch_calibrate)プログラムを
 一度書き込んで得られた配列値と差し替えてください。
 
 i2sDinDisp (i2sDinDisp.ino)
 
-14 #ifdef TOUCH_CS
-15 uint16_t calData[5] = { 462, 3364, 336, 3324, 7 };
-16 #endif
+    14 #ifdef TOUCH_CS
+    15 uint16_t calData[5] = { 462, 3364, 336, 3324, 7 };
+    16 #endif
 
 スプライトは利用していますが実装としてフレームバッファ 1 枚として利用してるにすぎません。目盛り文字列/凡例/グラフ目盛りなど毎回描画してると言う事です(笑)
 
@@ -152,7 +152,7 @@ FFT 後の周波数解析結果をバンド化するアルゴリズムは昔組�
 
 i2sDinDisp (i2sDinDisp.ino)
 
-12 int idBList[] = { 6, 10, 15, 20, 30, 40, 50, 60, 70, 80, DB_RANGE_VALUE };
+    12 int idBList[] = { 6, 10, 15, 20, 30, 40, 50, 60, 70, 80, DB_RANGE_VALUE };
 
 ![PCM1808 Features](/img/PCM1808_001.jpg)
 
