@@ -7,13 +7,13 @@ esp32-wrover を活用して I2S オーディオ入力(ADC)の視覚化として
 # 2. 経緯
 
 2021年10月頃なにげに esp32 の[資料](https://docs.espressif.com/projects/esp-idf/zh_CN/latest/esp32/api-reference/peripherals/i2s.html)を読んでいて I2S のピン定義に
-mck_io_num (MCK in out pin. Note that ESP32 supports setting MCK on GPIO0/GPIO1/GPIO3 only) と記述されているのを見てついに
+mck_io_num MCK in out pin. Note that ESP32 supports setting MCK on GPIO0/GPIO1/GPIO3 only と記述されているのを見てついに
 MCK(マスタークロック) 出せるようになったんだと思いました。以前、某氏からせがまれて Raspberry Pi 3 Model B 向けな TEXAS INSTRUMENTS (以下tiと略) の
 [PCM1808](https://www.ti.com/lit/ds/symlink/pcm1808.pdf)を実装したボード製作した事も思い出しました(笑) その際に製作した予備ボードを引っ張り出して改造
 (外部電源入力ピン出し。I2S関連端子ピン出し。外部クロック入力可化。MD0/MD1/FMTのジャンパ化)したものを esp32 で活用して見ようと仕事の合間を見ながら
 ちまちま進めて結果がここです。
 
-そもそも某氏から ti の PCM1808 (旧Burr Brown製) 実装ボード製作をせがまれたのもトラ技2017年1月号で [Pumpkin Pi](http://einstlab.web.fc2.com/RaspberryPi/PumpkinPi.html) の記事を読んだらしく手持ちの
+そもそも某氏から ti の PCM1808 旧Burr Brown製 実装ボード製作をせがまれたのもトラ技2017年1月号で [Pumpkin Pi](http://einstlab.web.fc2.com/RaspberryPi/PumpkinPi.html) の記事を読んだらしく手持ちの
 アナログ音源(SP/EP/LP/カセットテープ/MD/などｗ)を 24bit/96KHz で取り込みしたいというオカルトチックな欲望と安価に製作依頼をして楽したいと言う狙いがあったらしい(笑)
 [マルツ](https://www.marutsu.co.jp/select/list/detail.php?id=258)で完成品も部品セットもあるから自分で注文して作れと言っても
 「arecord して flac 化するスクリプトは自分で書くからさ〜 老眼すぎてもう手ハンダ無理(TдT) PCM1808 だけでいいんよ。頼むよ〜(^o^)」と某氏は言ってた気がする(笑)
