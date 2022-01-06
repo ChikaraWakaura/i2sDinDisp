@@ -27,11 +27,8 @@ MCK(マスタークロック) 出せるようになったんだと思いまし�
 ハードウェア
 
 esp32-wrover-b 搭載開発ボード(esp32-wroom-32 搭載開発ボードも可。以下esp32と略)
-
 ILI9341 SPI 接続 240x320 RGB565 タッチパネル付き (以下TFTと略)
-
 PCM1808 チップ実装ボード(自作。以下PCM1808ボードと略)
-
 
 PCM1808ボードは[秋月電子通商](https://akizukidenshi.com/catalog/default.aspx)な部品で元々 PCM1808 マスターで 48K or 96K ジャンパピンで組んでたのが丸わかりです(笑)
 ![PCM1808ボード](/img/P_20220106_213831.jpg)
@@ -39,13 +36,9 @@ PCM1808ボードは[秋月電子通商](https://akizukidenshi.com/catalog/defaul
 ソフトウェア
 
 [arduino IDE](https://www.arduino.cc/en/software) Linux 64bits ver 1.8.19
-
 [Arduino core for the ESP32](https://github.com/espressif/arduino-esp32) ver 2.0.2
-
 [TFT_eSPI](https://github.com/Bodmer/TFT_eSPI) ver 2.4.2
-
 [arduinoFFT](https://github.com/kosme/arduinoFFT) ver 1.5.6
-
 
 # 4. ハード編
 
