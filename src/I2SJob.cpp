@@ -53,7 +53,7 @@ bool  i2sInit( void )
   Result = i2s_set_pin( I2S_NUM_0, &i2s_pin_config );
   if ( Result != ESP_OK )
   {
-    Serial.printf( "i2s_set_pin() : failed Result:%d\n", Result );
+    Serial.printf( "i2s_set_pin() : failed. Result:%d\n", Result );
     return false;
   }
 

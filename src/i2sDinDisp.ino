@@ -9,7 +9,7 @@ int iScreenHeight;
 uint16_t *pwVerticalColor;
 int iDispMode;
 int iDispSpectrumChannel;
-int idBList[] = { 6, 10, 15, 20, 30, 40, 50, 60, 70, 80, DB_RANGE_VALUE };
+int idBList[] = { 6, 10, 15, 20, 30, 40, 50, 60, 70, 80, 90, DB_RANGE_VALUE };
 
 #ifdef TOUCH_CS
 uint16_t calData[5] = { 462, 3364, 336, 3324, 7 };
@@ -404,7 +404,7 @@ void  DispSpectrum( void )
   int iHeight = iScreenHeight - ( FONT_HEIGHT + 1 );
   int iGYBottom = iHeight - 1;
   int iGX1, iGY1, iGX2, iGY2;
-  int iA = iScreenWidth / log10( FFT_HALF_SIZE );
+  int iA = iWidth / log10( FFT_HALF_SIZE );
   uint16_t wColor = ( iDispSpectrumChannel == 0 ? TFT_GREEN : TFT_CYAN );
   DrawSpectrumXAxis( iGXOffset, iHeight, iA );
   DrawSpectrumYAxis( iGXOffset, iHeight );
@@ -470,7 +470,7 @@ void  DispSpectrum( void )
 void  DrawSpectrumXAxis( int iGXOffset, int iHeight, int iA )
 {
   double dHz = SAMPLE_RATE / FFT_SIZE;
-  for ( int iFreq = 63; iFreq < ( SAMPLE_RATE / 2 ); iFreq *= 2 )
+  for ( int iFreq = 63; iFreq <= ( SAMPLE_RATE / 2 ); iFreq *= 2 )
   {
     iFreq = ( iFreq == 126 ? 125 : iFreq );
     int iPos = ceilf( iFreq / dHz );
@@ -519,9 +519,17 @@ void  DrawStringFreq( double dFreq, int iGX, int iGY, int iGXSize )
   {
     sprintf( szHz, "%d", (int)ceilf( dFreq ) );
   }
-  int iA = ( FONT_WIDTH * strlen( szHz ) ) / 2;
-  iGX -= iA;
-  iGX += iGXSize / 2;
+  if ( iGX >= ( iScreenWidth - 1 ) )
+  {
+    int iA = ( FONT_WIDTH * strlen( szHz ) ) + 2;
+    iGX -= iA;
+  }
+  else
+  {
+    int iA = ( FONT_WIDTH * strlen( szHz ) ) / 2;
+    iGX -= iA;
+    iGX += iGXSize / 2;
+  }
   spr.setCursor( iGX, iGY + 1 );
   spr.printf( "%s", szHz );
   iOldGX = iGX;
