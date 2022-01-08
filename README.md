@@ -3,6 +3,7 @@
 esp32 を活用して I2S オーディオ入力(ADC)の視覚化としてよくある LED 風バンド表示と、おまけレベルな周波数スペクトル表示を行うプログラムです。
 
 手っ取り早く動作結果を知りたい方のために[動画](/img/VIDEO000.mp4)にしました。音声は完全カットしています。
+![TOP](/img/TOP.jpg)
 
 # 2. 経緯
 
@@ -116,17 +117,16 @@ TFT_eSPI のタッチパネル機能を利用する場合には TFT の個体差
 
     i2sDinDisp (i2sDinDisp.ino)
 
-    14 #ifdef TOUCH_CS
     15 uint16_t calData[5] = { 462, 3364, 336, 3324, 7 };
-    16 #endif
+
 
 スプライトは利用していますが実装としてフレームバッファ 1 枚として利用してるにすぎません。目盛り文字列/凡例/グラフ目盛りなど毎回描画してると言う事です(笑)
 
 esp32 で psram が利用できる場合は FFT 用のメモリは psram 側ヒープより取得します。スプライトの色深度も 16 として RGB565 で利用し LED 風レベル表示を TFT
 向かって上から下へ赤→黄→緑とし、それぞれ範囲を 20 % , 30 % , 残りとしてグラデーションした色値を利用するようにしました。
 
-タッチパネル接続が有効で #define HARD_CHANNELS STEREO and #define DISP_CHANNELS STEREO の場合、TFT 向かって左側タッチすると左チャンネル、右側タッチ
-すると右チャンネルのおまけレベルな周波数スペクトル表示に切り替わります。再度タッチするとバンド表示に戻ります。
+タッチパネル接続が有効で TFT タッチするとメニュー表示します。項目タッチでそれぞれの状態表示に切り替わります。
+![MENU](/img/MENU.jpg)
 
 i2s_config_t の dma_buf_count と dma_buf_len が最新の[資料](https://docs.espressif.com/projects/esp-idf/zh_CN/latest/esp32/api-reference/peripherals/i2s.html)で解説されていました。
 dma_buf_count は dma_desc_num のエイリアス。dma_desc_num の解説を読んだ範囲で理解したのは dma バッファ転送に関連したディスクリプタ(管理識別子やらポインタ
