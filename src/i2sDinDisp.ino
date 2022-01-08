@@ -13,6 +13,26 @@ int idBList[] = { 6, 10, 15, 20, 30, 40, 50, 60, 70, 80, 90, DB_RANGE_VALUE };
 
 #ifdef TOUCH_CS
 uint16_t calData[5] = { 462, 3364, 336, 3324, 7 };
+
+TFT_eSPI_Button btn[8];
+struct  {
+  const char *pcszName;
+  uint16_t wColor;
+  TFT_eSPI_Button *btn;
+} Menu[] = {
+  "close",   TFT_RED,  &btn[0],
+  "8BANDS",  TFT_BLUE, &btn[1],
+  "10BANDS", TFT_BLUE, &btn[2],
+  "16BANDS", TFT_BLUE, &btn[3],
+  "24BANDS", TFT_BLUE, &btn[4],
+  "32BANDS", TFT_BLUE, &btn[5],
+#if HARD_CHANNELS == STEREO && DISP_CHANNELS == STEREO
+  "LSpectrum", TFT_BLUE, &btn[6],
+  "RSpectrum", TFT_BLUE, &btn[7],
+#else
+  "Spectrum", TFT_BLUE, &btn[6],
+#endif
+};
 #endif
 
 
@@ -37,7 +57,11 @@ void setup()
     Serial.printf( "tftInit() not enough memory\n" ); HLT;
   }
 
-  MakeLogBand( &i2sDin.dBandFreq[0], FFT_HALF_SIZE, NULL, 0, SAMPLE_RATE, BANDS );
+  if ( !bandsInit( BANDS ) )
+  {
+    Serial.printf( "bandsInit() not enough memory\n" ); HLT;
+  }
+
   Disp();
 }
 
@@ -45,8 +69,9 @@ void loop()
 {
   if ( i2sRead( &i2sDin ) == true )
   {
+    bool fMenuExec = false;
 #ifdef TOUCH_CS
-    touchJob();
+    fMenuExec = touchJob();
 #endif
     fftDataSet();
     for ( int c = 0; c < DISP_CHANNELS; c++ )
@@ -55,10 +80,13 @@ void loop()
       i2sDin.ch[c].FFT.Windowing( FFT_WIN_TYP_HANN, FFT_FORWARD );
       i2sDin.ch[c].FFT.Compute( FFT_FORWARD );
       i2sDin.ch[c].FFT.ComplexToMagnitude();
-      MakeLogBand( &i2sDin.ch[c].dReal[1], FFT_HALF_SIZE, &i2sDin.ch[c].iBandData[0], DB_RANGE, DATA_RANGE, BANDS );
-      UpdatePeakBand( &i2sDin.ch[c].iBandData[0], &i2sDin.ch[c].iBandPeak[0], &i2sDin.ch[c].tv, BANDS );
+      MakeLogBand( &i2sDin.ch[c].dReal[1], FFT_HALF_SIZE, &i2sDin.ch[c].iBandData[0], DB_RANGE, DATA_RANGE, i2sDin.iBands );
+      UpdatePeakBand( &i2sDin.ch[c].iBandData[0], &i2sDin.ch[c].iBandPeak[0], &i2sDin.ch[c].tv, i2sDin.iBands );
     }
-    Disp();
+    if ( !fMenuExec )
+    {
+      Disp();
+    }
   }
 }
 
@@ -106,7 +134,9 @@ bool  tftInit( void )
   spr.setTextSize( 1 );
   spr.setTextColor( TFT_WHITE );
 
-  size_t stSize = sizeof( uint16_t ) * iScreenHeight;
+  int iB = FONT_HEIGHT + 1;
+  int iHeight = iScreenHeight - iB;
+  size_t stSize = sizeof( uint16_t ) * iHeight;
   pwVerticalColor = (uint16_t *)malloc( stSize );
   if ( pwVerticalColor == NULL )
   {
@@ -117,8 +147,6 @@ bool  tftInit( void )
   int iR1 = 0xFF, iG1 = 0x00, iB1 = 0x00;   // Web color RED    #FF0000
   int iR2 = 0xFF, iG2 = 0xFF, iB2 = 0x00;   // Web color YELLOW #FFFF00
   int iR3 = 0x00, iG3 = 0xFF, iB3 = 0x00;   // Web color GREEN  #00FF00
-  int iB = FONT_HEIGHT + 1;
-  int iHeight = iScreenHeight - iB;
   int iLimit1 = (int)( (double)iHeight * 0.2 );
   int iLimit2 = (int)( (double)iLimit1 + (double)iHeight * 0.3 );
   for ( int i = 0; i < iHeight; i++ )
@@ -163,6 +191,72 @@ bool  tftInit( void )
   return true;
 }
 
+bool  bandsInit( int iBands )
+{
+  if ( iBands <= 0 )
+  {
+    return false;
+  }
+  if ( i2sDin.iBands == iBands )
+  {
+    return true;
+  }
+  i2sDin.iBands = iBands;
+  void *p = (void *)i2sDin.dBandFreq;
+  size_t stSize = sizeof( *i2sDin.dBandFreq ) * ( i2sDin.iBands + 1 );
+  if ( p == NULL )
+  {
+    p = malloc( stSize );
+  }
+  else
+  {
+    p = realloc( p, stSize );
+  }
+  if ( p == NULL ) return false;
+  i2sDin.dBandFreq = (double *)p;
+  if ( !MakeLogBand( &i2sDin.dBandFreq[0], FFT_HALF_SIZE, NULL, 0, SAMPLE_RATE, i2sDin.iBands ) )
+  {
+    return false;
+  }
+  for ( int c = 0; c < DISP_CHANNELS; c++ )
+  {
+    p = (void *)i2sDin.ch[c].iBandData;
+    stSize = sizeof( *i2sDin.ch[c].iBandData ) * i2sDin.iBands;
+    if ( p == NULL )
+    {
+      p = malloc( stSize );
+    }
+    else
+    {
+      p = realloc( p, stSize );
+    }
+    if ( p == NULL ) return false;
+    i2sDin.ch[c].iBandData = (int *)p;
+    for ( int i = 0; i < i2sDin.iBands; i++ )
+    {
+      i2sDin.ch[c].iBandData[i] = 0;
+    }
+
+    p = (void *)i2sDin.ch[c].iBandPeak;
+    stSize = sizeof( *i2sDin.ch[c].iBandPeak ) * i2sDin.iBands;
+    if ( p == NULL )
+    {
+      p = malloc( stSize );
+    }
+    else
+    {
+      p = realloc( p, stSize );
+    }
+    if ( p == NULL ) return false;
+    i2sDin.ch[c].iBandPeak = (int *)p;
+    for ( int i = 0; i < i2sDin.iBands; i++ )
+    {
+      i2sDin.ch[c].iBandPeak[i] = 0;
+    }
+  }
+  return true;
+}
+
 void  fftDataSet( void )
 {
   int16_t *psAdrs = (int16_t *)&i2sDin.bWaveBuf[0];
@@ -188,7 +282,7 @@ void  fftDataSet( void )
   }
 }
 
-double  ComputeFreqBand( double *pdFreqBuf, int iFFTHalfSize, int iBand, int iBandMax, double *pdXScale )
+double  ComputeFreqBand( double *pdFreqBuf, int iFFTHalfSize, int iBand, int iBands, double *pdXScale )
 {
   int iPoint1 = ceilf( pdXScale[ iBand ] );
   int iPoint2 = floorf( pdXScale[ iBand + 1 ] );
@@ -220,53 +314,60 @@ double  ComputeFreqBand( double *pdFreqBuf, int iFFTHalfSize, int iBand, int iBa
   return dResult;
 }
 
-void  MakeLogBand( double *pdFreqBuf, int iFFTHalfSize, int *piBandData, int iDbRange, int iRange, int iBandMax )
+bool  MakeLogBand( double *pdFreqBuf, int iFFTHalfSize, int *piBandData, int iDbRange, int iRange, int iBands )
 {
-  static bool fInitBandsXScale;
+  static int iOldBands;
   static double *pdXScale;
-  if ( iBandMax == 0 )
+  if ( iBands <= 0 )
   {
-    return;
+    return false;
   }
-  if ( fInitBandsXScale == false )
+  if ( iOldBands != iBands )
   {
-    size_t stSize = sizeof( double ) * ( iBandMax + 1 );
-    pdXScale = (double *)malloc( stSize );
-    if ( pdXScale == NULL )
+    size_t stSize = sizeof( *pdXScale ) * ( iBands + 1 );
+    void *p = (void *)pdXScale;
+    if ( p == NULL )
     {
-      return;
+      p = malloc( stSize );
     }
-    for ( int i = 0; i <= iBandMax; i++ )
+    else
     {
-      pdXScale[i] = pow( iFFTHalfSize, (double)i / (double)iBandMax );
+      p = realloc( p, stSize );
+    }
+    if ( p == NULL ) return false;
+    pdXScale = (double *)p;
+    for ( int i = 0; i <= iBands; i++ )
+    {
+      pdXScale[i] = pow( iFFTHalfSize, (double)i / (double)iBands );
       if ( pdFreqBuf != NULL && piBandData == NULL && iDbRange == 0 )
       {
         int iSamplingRate = iRange;
         pdFreqBuf[i] = iSamplingRate / ( ( iFFTHalfSize * 2 ) / pdXScale[i] );
       }
     }
-    fInitBandsXScale = true;
+    iOldBands = iBands;
     if ( pdFreqBuf != NULL && piBandData == NULL && iDbRange == 0 )
     {
-      return;
+      return true;
     }
   }
-  for ( int i = 0; i < iBandMax; i++ )
+  for ( int i = 0; i < iBands; i++ )
   {
-    double dData = ComputeFreqBand( pdFreqBuf, iFFTHalfSize, i, iBandMax, pdXScale );
+    double dData = ComputeFreqBand( pdFreqBuf, iFFTHalfSize, i, iBands, pdXScale );
     dData = ( dData / (double)iDbRange ) * (double)iRange;
     piBandData[i] = min( max( dData, (double)0 ), (double)iRange );
   }
+  return true;
 }
 
-void  UpdatePeakBand( int *piBandData, int *piBandPeak, struct timeval *ptvOld, int iBandMax )
+void  UpdatePeakBand( int *piBandData, int *piBandPeak, struct timeval *ptvOld, int iBands )
 {
   struct timeval tvNow;
   struct timeval tvDiff;
   gettimeofday( &tvNow, NULL );
   timersub( &tvNow, ptvOld, &tvDiff  );
   int32_t lCheckTime = tvDiff.tv_sec * 1000 + tvDiff.tv_usec / 1000;
-  for ( int i = 0; i < iBandMax; i++ )
+  for ( int i = 0; i < iBands; i++ )
   {
     if ( piBandData[i] > piBandPeak[i] )
     {
@@ -281,30 +382,162 @@ void  UpdatePeakBand( int *piBandData, int *piBandPeak, struct timeval *ptvOld, 
 }
 
 #ifdef TOUCH_CS
-void  touchJob( void )
+bool  touchJob( void )
 {
+  static int iSeqNo;
   static bool fOldPressed;
   bool fPressed = false;
-  uint16_t wX = 0;
-  uint16_t wY = 0;
-  fPressed = tft.getTouch( &wX, &wY );
-  if ( fOldPressed == false && fPressed == true )
+  bool fResult = false;
+  uint16_t wTX = 0;
+  uint16_t wTY = 0;
+  fPressed = tft.getTouch( &wTX, &wTY );
+  switch ( iSeqNo )
   {
-    iDispMode++;
-    if ( iDispMode > 1 ) iDispMode = 0;
-    if ( iDispMode == 1 && HARD_CHANNELS == STEREO && DISP_CHANNELS == STEREO )
-    {
-      if ( wX >= 0 && wX < ( iScreenHeight / 2 ) )
+    case 0:
+      if ( fOldPressed == false && fPressed == true )
       {
-        iDispSpectrumChannel = 0;
+        DrawMenu();
+        iSeqNo = 110;
+        fResult = true;
       }
-      else
+      break;
+    case 110:
+      fResult = true;
+      if ( fOldPressed == false && fPressed == false )
       {
-        iDispSpectrumChannel = 1;
+        iSeqNo = 120;
       }
-    }
+      break;
+    case 120:
+      fResult = true;
+      if ( SelctMenu( fPressed, wTX, wTY ) )
+      {
+        iSeqNo = 0;
+        fResult = false;
+      }
+      break;
   }
   fOldPressed = fPressed;
+  return fResult;
+}
+
+void  DrawMenu( void )
+{
+  const GFXfont *font = &FreeMono9pt7b;
+  int iMenuItems = ARRAY_SIZE( Menu );
+  int iTextMax = 0;
+  int iTextSize = 1;
+  int iFontWidth;
+  int iFontHeight;
+  int iXX;
+  int iYY;
+  tft.setFreeFont( font );
+  iFontWidth = font->glyph->xAdvance * iTextSize;
+  iFontHeight = font->yAdvance * iTextSize;
+  for ( int i = 0; i < iMenuItems; i++ )
+  {
+    int iLen = strlen( Menu[i].pcszName );
+    if ( iLen > iTextMax )
+    {
+      iTextMax = iLen + 2;
+    }
+  }
+  int iW = iTextMax * iFontWidth + 4 * iFontWidth;
+  int iH = iMenuItems * iFontHeight + iMenuItems * FONT_HEIGHT + 2 * FONT_HEIGHT;
+  iXX = iScreenWidth / 2 - iW / 2;
+  iYY = iScreenHeight / 2 - iH / 2;
+  iXX = ( iXX < 0 ? 0 : iXX );
+  iYY = ( iYY < 0 ? 0 : iYY );
+  tft.fillRect( iXX, iYY, iW, iH, TFT_DARKGREY );
+  for ( int i = 0; i < iMenuItems; i++ )
+  {
+    int iX = iXX + 2 * iFontWidth;
+    int iY = iYY + i * iFontHeight + i * FONT_HEIGHT + FONT_HEIGHT;
+    iW = iTextMax * iFontWidth;
+    iH = iFontHeight + 2;
+    Menu[i].btn->initButtonUL( &tft, iX, iY, iW, iH, TFT_WHITE, Menu[i].wColor, TFT_WHITE, (char *)Menu[i].pcszName, iTextSize );
+    Menu[i].btn->drawButton();
+  }
+}
+
+bool  SelctMenu( bool fPressed, uint16_t wTX, uint16_t wTY )
+{
+  bool fResult = false;
+  int iMenuItems = ARRAY_SIZE( Menu );
+  int iSelectMenuNo = -1;
+  int iBands = -1;
+  for ( int i = 0; i < iMenuItems; i++ )
+  {
+    if ( fPressed && Menu[i].btn->contains( wTX, wTY ) )
+    {
+      Menu[i].btn->press( true );
+    }
+    else
+    {
+      Menu[i].btn->press( false );
+    }
+  }
+  for ( int i = 0; i < iMenuItems; i++ )
+  {
+    if ( Menu[i].btn->justReleased() )
+    {
+      Menu[i].btn->drawButton();
+    }
+    if ( Menu[i].btn->justPressed() )
+    {
+      Menu[i].btn->drawButton( true );
+      iSelectMenuNo = i;
+    }
+  }
+  switch ( iSelectMenuNo )
+  {
+    case 0:
+      fResult = true;
+      break;
+    case 1:
+      fResult = true;
+      iDispMode = 0;
+      iBands = 8;
+      break;
+    case 2:
+      fResult = true;
+      iDispMode = 0;
+      iBands = 10;
+      break;
+    case 3:
+      fResult = true;
+      iDispMode = 0;
+      iBands = 16;
+      break;
+    case 4:
+      fResult = true;
+      iDispMode = 0;
+      iBands = 24;
+      break;
+    case 5:
+      fResult = true;
+      iDispMode = 0;
+      iBands = 32;
+      break;
+    case 6:
+      fResult = true;
+      iDispMode = 1;
+      iDispSpectrumChannel = 0;
+      break;
+    case 7:
+      fResult = true;
+      iDispMode = 1;
+      iDispSpectrumChannel = 1;
+      break;
+  }
+  if ( iBands != -1 )
+  {
+    if ( !bandsInit( iBands ) )
+    {
+      Serial.printf( "bandsInit() not enough memory\n" ); HLT;
+    }
+  }
+  return fResult;
 }
 #endif
 
@@ -324,10 +557,8 @@ void  Disp( void )
 
 void  DispBand( void )
 {
-  int iBands = BANDS;
+  int iBands = i2sDin.iBands;
   int iDispChannels = DISP_CHANNELS;
-  int iGXStep;
-  int iGX = 0;
   int iHeight = iScreenHeight - ( FONT_HEIGHT + 1 );
   int iGYBottom = iHeight - 1;
   if ( iBands <= 0 )
@@ -342,8 +573,12 @@ void  DispBand( void )
     spr.print( "Not Draw : DISP_CHANNELS <= 0" );
     return;
   }
-  iGXStep = iScreenWidth / iBands / iDispChannels;
+  spr.setTextSize( 1 );
+  spr.setTextColor( TFT_WHITE );
+  int iGXStep = iScreenWidth / iBands / iDispChannels;
   if ( iGXStep < 2 ) iGXStep = 2;
+  int iCheck = iScreenWidth % iBands;
+  int iGX = ( iCheck == 0 ? 0 : ( iScreenWidth - ( iBands * iGXStep * iDispChannels + 1 ) ) / 2 );
   if ( iDispChannels == MONO )
   {
     // L CHANNEL : low ~ high
@@ -406,6 +641,8 @@ void  DispSpectrum( void )
   int iGX1, iGY1, iGX2, iGY2;
   int iA = iWidth / log10( FFT_HALF_SIZE );
   uint16_t wColor = ( iDispSpectrumChannel == 0 ? TFT_GREEN : TFT_CYAN );
+  spr.setTextSize( 1 );
+  spr.setTextColor( TFT_WHITE );
   DrawSpectrumXAxis( iGXOffset, iHeight, iA );
   DrawSpectrumYAxis( iGXOffset, iHeight );
   iGX1 = -1;

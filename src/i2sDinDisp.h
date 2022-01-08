@@ -83,15 +83,16 @@ typedef struct TAG_I2S_DIN_INFO {
   uint8_t       bI2SBuf[ BLOCK_SIZE ];
   int           iWaveBufWritePtr;
   uint8_t       bWaveBuf[ WAVE_SIZE ];
+  int           iBands;
+  double        *dBandFreq;
   struct {
     arduinoFFT  FFT;
     double      *dReal;
     double      *dImag;
-    int         iBandData[ BANDS ];
-    int         iBandPeak[ BANDS ];
+    int         *iBandData;
+    int         *iBandPeak;
     struct timeval tv;
   } ch[ DISP_CHANNELS ];
-  double        dBandFreq[ BANDS + 1 ];
 } I2S_DIN_INFO, *PI2S_DIN_INFO;
 
 // I2SJob.cpp
