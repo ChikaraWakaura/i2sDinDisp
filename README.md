@@ -37,6 +37,7 @@ PCM1808ボードは[秋月電子通商](https://akizukidenshi.com/catalog/defaul
 [Arduino core for the ESP32](https://github.com/espressif/arduino-esp32) ver 2.0.2<br>
 [TFT_eSPI](https://github.com/Bodmer/TFT_eSPI) ver 2.4.2<br>
 [arduinoFFT](https://github.com/kosme/arduinoFFT) ver 1.5.6<br>
+[arduino-esp32fs-plugin](https://github.com/me-no-dev/arduino-esp32fs-plugin) ver ?<br>
 
 # 4. ハード編
 
