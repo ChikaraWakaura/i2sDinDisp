@@ -60,11 +60,52 @@ bool  i2sInit( void )
   return true;
 }
 
+#ifdef DEBUG
+bool  spiffsRead( PI2S_DIN_INFO pDin )
+{
+static File FileWave;
+static int iSeqNo;
+  switch ( iSeqNo )
+  {
+    case 0:
+      if ( !SPIFFS.begin() )
+      {
+        return false;
+      }
+      FileWave = SPIFFS.open( "/1K-0dB01.WAV", "r" );
+      if ( !FileWave )
+      {
+        return false;
+      }
+      FileWave.seek( 44, SeekSet );
+      iSeqNo = 10;
+      // Non break
+    case 10:
+      while ( 1 )
+      {
+        if ( ( FileWave.read( &pDin->bWaveBuf[0], WAVE_SIZE ) ) == WAVE_SIZE )
+        {
+          break;
+        }
+        FileWave.seek( 44, SeekSet );
+      }
+      break;
+  }
+  return true;
+}
+#endif
+
 bool  i2sRead( PI2S_DIN_INFO pDin )
 {
   size_t ByteRead = 0;
   esp_err_t Result;
   bool fResult = false;
+#ifdef DEBUG
+  if ( spiffsRead( pDin ) == true )
+  {
+    return true;
+  }
+#endif
   Result = i2s_read( I2S_NUM_0, &pDin->bI2SBuf[0], BLOCK_SIZE, &ByteRead, portMAX_DELAY );
   if ( Result == ESP_OK && ByteRead == BLOCK_SIZE )
   {

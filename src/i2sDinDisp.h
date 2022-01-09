@@ -4,6 +4,7 @@
 #include <time.h>
 #include <math.h>
 #include <WiFi.h>
+#include <FS.h>
 #include <SPI.h>
 #include <TFT_eSPI.h>
 #include <arduinoFFT.h>
@@ -53,7 +54,7 @@
 #define FONT_HEIGHT           8
 #define DB_RANGE              45
 #define DATA_RANGE            100
-#define ZERO_DB               45.105450 // 45.105450 = 10 * log10( 180 * 180 )
+#define ZERO_DB               42.797582 // 42.797582 = 10 * log10( 138 * 138 )
 #define DB_RANGE_VALUE        99
 
 #define I2S_DIN               25
