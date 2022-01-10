@@ -9,7 +9,7 @@ bool  i2sInit( void )
     .bits_per_sample      = ( ( BIT_PER_SAMPLE == BPS16BIT ) ? I2S_BITS_PER_SAMPLE_16BIT : I2S_BITS_PER_SAMPLE_32BIT ),
     .channel_format       = ( ( HARD_CHANNELS == MONO ) ? I2S_CHANNEL_FMT_ONLY_LEFT : I2S_CHANNEL_FMT_RIGHT_LEFT ),
 #if ESP_ARDUINO_VERSION_MAJOR >= 2
-    .communication_format = (i2s_comm_format_t)( I2S_COMM_FORMAT_STAND_I2S | I2S_COMM_FORMAT_STAND_MSB ),
+    .communication_format = (i2s_comm_format_t)( I2S_COMM_FORMAT_STAND_I2S ),
 #else
     .communication_format = (i2s_comm_format_t)( I2S_COMM_FORMAT_I2S ),
 #endif
@@ -43,12 +43,6 @@ bool  i2sInit( void )
     Serial.printf( "i2s_driver_install() : failed. Result:%d\n", Result );
     return false;
   }
-
-#ifdef  PHILLIPS_I2S
-  // https://esp32.com/viewtopic.php?t=4997
-  REG_SET_BIT( I2S_TIMING_REG( I2S_NUM_0 ), BIT(9) );         // I2S_RX_SD_IN_DELAY
-  REG_SET_BIT( I2S_CONF_REG( I2S_NUM_0 ), I2S_RX_MSB_SHIFT ); // Phillips I2S - WS changes a cycle earlier
-#endif
 
   Result = i2s_set_pin( I2S_NUM_0, &i2s_pin_config );
   if ( Result != ESP_OK )

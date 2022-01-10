@@ -35,7 +35,6 @@
 #define RGB565( r, g ,b )     ( (unsigned short)( ( r >> 3 ) << 11 ) | ( ( g >> 2 ) << 5 ) | ( b >> 3 ) )
 #define HLT                   { while ( 1 ) { delay( 500 ); } }
 
-#define PHILLIPS_I2S
 #define ESP32_I2S_MASTER      1         // 1:ESP32 MASTER other:ESP32 SLAVE
 #define HARD_CHANNELS         STEREO    // 1:LEFT(MONO) 2:RIGHT&LEFT(STEREO)
 #define SAMPLE_RATE           RATE32KHZ
